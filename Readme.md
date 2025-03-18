@@ -8,7 +8,7 @@ single-spa的呈现形式实际还是非iframe的单页应用程序（spa），�
 
 类似的微前端实现方式还有[vite-plugin-federation](https://github.com/originjs/vite-plugin-federation)，笔者同样进行了实践，single-spa更侧重异构的整合及remote的完整生命周期管理，vite-plugin-federation侧重于组件级的整合；css隔离及全局事件方法等任然需要开发者自行注意；笔者暂时选择single-spa的原因是root及各remote可以做到几乎完全的独立，同时通过root进行路由规划，亦可以完整继承全部项目的路由，而vite-plugin-federation偏向组件重用，在路由规划上需要额外的实现；将来有机会，也会分享vite-plugin-federation的实践过程；
 
-本文及演示项目github仓库：，仓库代码是根据本文同步创建的，从vue的模板做的调整已极致简化了，亦可作为single-spa微前端的模板项目使用；
+本文及演示项目github仓库：(https://github.com/topabomb/micro-frontends-single-spa-demo)，仓库代码是根据本文同步创建的，从vue的模板做的调整已极致简化了，亦可作为single-spa微前端的模板项目使用；
 
 ## Root 项目
 
