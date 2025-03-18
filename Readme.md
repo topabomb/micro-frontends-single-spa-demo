@@ -1,6 +1,6 @@
 # Vite & Vue3 Typescript版的single-spa微前端实战 - 前端项目拆分实践
 
-本文为Markdown格式，效果不好的话，请访问https://www.cnblogs.com/hualei/articles/18778924或https://github.com/topabomb/micro-frontends-single-spa-demo查看；
+本文为Markdown格式，效果不好的话，请访问https://www.cnblogs.com/hualei/articles/18778924; 或https://github.com/topabomb/micro-frontends-single-spa-demo 查看；
 
 前端项目由于功能繁复且多次迭代，单项目的模式会越来越大，严重影响打包效率和加载时间；将大的前端项目拆分为多个子项目app（本文称为remote项目），每个团队可以单独负责一个或多个子项目，通过root项目进行组合，实现逻辑及代码分离；详细的微前端论文和介绍请访问(https://micro-frontends.org/)
 
