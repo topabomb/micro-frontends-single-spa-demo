@@ -102,60 +102,57 @@ export default defineConfig({
 - ./src/single-spa.setup.ts
 > 注意apps的配置，与上面importMaps中的命名需要对应；registerSpas方法将在main.ts中使用，启动Single-spa的上下文环境
 
-> customProps中的basePath用于remote与root项目的路由分离
+> customProps中的basePath用于remote与root项目的路由分离，container将指定的容器元素传递给remote
 ``` typescript
 import { registerApplication, start } from 'single-spa'
 export const apps = {
-    app: '@topabomb/app1',
-    app2: '@topabomb/app2',
+  app1: '@topabomb/app1',
+  app2: '@topabomb/app2',
 }
-export function registerSpas() {
-    for (const [route, moduleName] of Object.entries(apps)) {
-        registerApplication({
-            name: route,
-            app: () => import(/* @vite-ignore */ moduleName),
-            activeWhen: `/${route}`,
-            customProps: {
-                basePath: `/${route}`,
-            },
-        })
-    }
-    runSpas()
+export function registerSpas(container:HTMLElement) {
+  for (const [route, moduleName] of Object.entries(apps)) {
+    registerApplication({
+      name: route,
+      app: () => import(/* @vite-ignore */ moduleName),
+      activeWhen: `/${route}`,
+      customProps: {
+        container,
+        basePath: `/${route}`,
+      },
+    })
+  }
+  runSpas()
 }
 export function runSpas() {
-    start()
+  start()
 }
-
 ```
 - ./src/main.ts
-> 此处几乎全部是vue模板的内容，额外registerSpas激活了single-spa环境
+> 此处几乎全部是vue模板的内容，额外registerSpas激活了single-spa环境，注意传递了remote_container作为remote渲染的容器
 ``` typescript
 import './assets/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
 import App from './App.vue'
 import router from './router'
 import { registerSpas } from './single-spa.setup.ts'
-registerSpas()
 const app = createApp(App)
-
 app.use(createPinia())
 app.use(router)
-
 app.mount('#app')
-
+registerSpas(document.getElementById("remote_container")!)
 ```
 
 ### 在root项目的合适位置展示Remote的路由
 
-由于我们直接使用了vue的默认模板，直接更改App.vue文件增加加载app1与app2的导航，使用RouterLink组件使得remote将在RouterView中加载
+由于我们直接使用了vue的默认模板，直接更改App.vue文件增加加载app1与app2的导航，通过前面的配置我们指定了remote将在remote_container中加载
 - ./src/App.vue
 ```vue
 ...
 <RouterLink to="/app1">App1</RouterLink>
 <RouterLink to="/app2">App2</RouterLink>
+...
+<div id="remote_container"></div>
 ...
 ```
 
@@ -257,16 +254,19 @@ import router from './router'
 import singleSpaVue, { type SingleSpaProps } from 'single-spa-vue'
 type Props = {
   name: string
+  container: HTMLElement
   basePath: string
 }
 const vueLifecycles = singleSpaVue({
   createApp,
   appOptions: {
     render() {
-      const { name, basePath } = this as unknown as Props
+      const { name, container, basePath } = this as unknown as Props
+      //h的额外参数非必须，这里演示把host的参数传递给remote的根元素
       return h(App, {
-        name: name,
-        basePath: basePath,
+        remoteName: name,
+        mountContainer:container.id,
+        remotePath: basePath,
       })
     },
   },
@@ -288,17 +288,18 @@ if (import.meta.env.MODE === 'development') {
 }
 export const bootstrap = vueLifecycles.bootstrap
 export const mount = async (prop: SingleSpaProps) => {
+  //在这里指定domElement为root传递过来的元素
   vueLifecycles
-    .mount(prop)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .mount({ domElement: (prop as unknown as any).container, ...prop })
     .then((v) => {
-      console.log(v)
+      console.log(`mount event:`,v)
     })
     .catch((e) => {
-      console.error(e)
+      console.error(`mount error:`,e)
     })
 }
 export const unmount = vueLifecycles.unmount
-
 ```
 ### 运行方式修改
 通过前面的修改，跟往常一样可以```npm run dev```来启动app1的开发环境；要该项目能够被root集成，我们需要增加新的启动脚本，在package.json的script增加dev:sspa和start两个指令：
