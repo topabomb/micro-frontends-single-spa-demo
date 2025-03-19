@@ -128,7 +128,7 @@ export function runSpas() {
 }
 ```
 - ./src/main.ts
-> 此处几乎全部是vue模板的内容，额外registerSpas激活了single-spa环境，注意传递了remote_container作为remote渲染的容器
+> 此处几乎全部是vue模板的内容，额外registerSpas激活了single-spa环境，注意传递了remote_container作为remote渲染的容器;
 ``` typescript
 import './assets/main.css'
 import { createApp } from 'vue'
